@@ -12,6 +12,9 @@ import {
 
 function SupplierDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [selectedVendor, setSelectedVendor] = useState(null);
 
   const vendors = [
     {
@@ -112,12 +115,28 @@ function SupplierDashboard() {
     }
   ];
   
-
   const myStats = {
     activeVendors: 23,
     monthlyRevenue: "₹1.2L",
     avgRating: 4.6,
     deliveries: 156
+  };
+
+  const handleContact = (vendor) => {
+    setSelectedVendor(vendor);
+    setModalType('contact');
+    setShowModal(true);
+  };
+
+  const handleQuote = (vendor) => {
+    setSelectedVendor(vendor);
+    setModalType('quote');
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedVendor(null);
   };
 
   const filteredVendors = vendors.filter(vendor =>
@@ -257,10 +276,16 @@ function SupplierDashboard() {
               </div>
 
               <div className="flex gap-3">
-                <button className="flex-1 bg-orange-600 text-white py-2.5 px-4 rounded-lg hover:bg-orange-700 transition-colors font-medium">
+                <button 
+                  onClick={() => handleContact(vendor)}
+                  className="flex-1 bg-orange-600 text-white py-2.5 px-4 rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                >
                   📞 Contact Now
                 </button>
-                <button className="flex-1 bg-green-600 text-white py-2.5 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                <button 
+                  onClick={() => handleQuote(vendor)}
+                  className="flex-1 bg-green-600 text-white py-2.5 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
                   💰 Send Quote
                 </button>
               </div>
@@ -295,6 +320,78 @@ function SupplierDashboard() {
         </div>
 
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0  bg-white/10 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">
+              {modalType === 'contact' ? '📞 Contact Vendor' : '💰 Send Quote'}
+            </h3>
+            
+            {selectedVendor && (
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">{selectedVendor.image}</span>
+                  <div>
+                    <h4 className="font-semibold">{selectedVendor.name}</h4>
+                    <p className="text-sm text-gray-600">{selectedVendor.location}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {modalType === 'contact' ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                  <Phone className="h-4 w-4" />
+                  <span className="text-sm sm:text-base">{selectedVendor?.phone}</span>
+                </div>
+                <button 
+                  onClick={() => window.open(`tel:${selectedVendor?.phone}`)}
+                  className="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700"
+                >
+                  Call Now
+                </button>
+                <button 
+                  onClick={() => window.open(`https://wa.me/${selectedVendor?.phone.replace(/[^0-9]/g, '')}`)}
+                  className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+                >
+                  WhatsApp
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <textarea
+                  placeholder="Enter your quote details..."
+                  className="w-full h-24 p-3 border rounded-lg resize-none text-sm"
+                />
+                <input
+                  type="text"
+                  placeholder="Price (e.g., ₹100 per kg)"
+                  className="w-full p-3 border rounded-lg text-sm"
+                />
+                <button 
+                  onClick={() => {
+                    alert('Quote sent successfully!');
+                    closeModal();
+                  }}
+                  className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+                >
+                  Send Quote
+                </button>
+              </div>
+            )}
+
+            <button 
+              onClick={closeModal}
+              className="w-full mt-3 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

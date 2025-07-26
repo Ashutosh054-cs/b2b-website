@@ -8,6 +8,7 @@ import SupplierDashboard from './pages/SupplierDashboard';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Faq from './pages/Faq';
+import OrderPage from './pages/OrderPage';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/faq" element={<Faq />} />
+        <Route path="/order/:supplierId" element={<OrderPage />} />
       </Routes>
     </Router>
   );
