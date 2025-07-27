@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Star,
@@ -11,17 +13,13 @@ import {
 } from "lucide-react";
 
 function SupplierDashboard() {
+  const { user, profile, signOut, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
   const [selectedVendor, setSelectedVendor] = useState(null);
-  // Profile modal state
-  const [showProfile, setShowProfile] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [profile, setProfile] = useState({ name: '', email: '' });
-  const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
-  const [isSignup, setIsSignup] = useState(false);
-  const [authError, setAuthError] = useState('');
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const vendors = [
     {
@@ -129,6 +127,17 @@ function SupplierDashboard() {
     deliveries: 156
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  // Redirect to auth if not authenticated
+  if (!isAuthenticated) {
+    navigate('/supplier-auth');
+    return null;
+  }
+
   const handleContact = (vendor) => {
     setSelectedVendor(vendor);
     setModalType('contact');
@@ -155,62 +164,38 @@ function SupplierDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       {/* Profile Modal */}
-      {showProfile && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setShowProfile(false)}>&times;</button>
-            {!isAuthenticated ? (
-              <div>
-                <h2 className="text-xl font-bold mb-4 text-center">{isSignup ? 'Sign Up' : 'Sign In'}</h2>
-                <form onSubmit={e => {
-                  e.preventDefault();
-                  if (isSignup && !authForm.name) {
-                    setAuthError('Name is required for sign up.');
-                    return;
-                  }
-                  if (!authForm.email || !authForm.password) {
-                    setAuthError('Email and password are required.');
-                    return;
-                  }
-                  setAuthError('');
-                  setIsAuthenticated(true);
-                  setProfile({ name: authForm.name || 'Supplier', email: authForm.email });
-                  setShowProfile(false);
-                }} className="space-y-4">
-                  {isSignup && (
-                    <div>
-                      <label className="block mb-1 font-medium">Name</label>
-                      <input type="text" name="name" value={authForm.name} onChange={e => setAuthForm(f => ({ ...f, name: e.target.value }))} className="w-full border rounded px-3 py-2" placeholder="Your Name" />
-                    </div>
-                  )}
-                  <div>
-                    <label className="block mb-1 font-medium">Email</label>
-                    <input type="email" name="email" value={authForm.email} onChange={e => setAuthForm(f => ({ ...f, email: e.target.value }))} className="w-full border rounded px-3 py-2" placeholder="you@example.com" />
-                  </div>
-                  <div>
-                    <label className="block mb-1 font-medium">Password</label>
-                    <input type="password" name="password" value={authForm.password} onChange={e => setAuthForm(f => ({ ...f, password: e.target.value }))} className="w-full border rounded px-3 py-2" placeholder="Password" />
-                  </div>
-                  {authError && <div className="text-red-500 text-sm">{authError}</div>}
-                  <button type="submit" className="w-full bg-orange-600 text-white py-2 rounded hover:bg-orange-700 transition">{isSignup ? 'Sign Up' : 'Sign In'}</button>
-                </form>
-                <div className="mt-4 text-center">
-                  <button className="text-orange-600 hover:underline text-sm" onClick={() => { setIsSignup(s => !s); setAuthError(''); }}>{isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}</button>
+            <button 
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" 
+              onClick={() => setShowProfileModal(false)}
+            >
+              &times;
+            </button>
+            <div className="text-center">
+              <h2 className="text-xl font-bold mb-2">Profile</h2>
+              <div className="mb-4">
+                <div className="font-semibold text-lg">{profile?.name}</div>
+                <div className="text-gray-600">{profile?.email}</div>
+                <div className="text-sm text-gray-500 mt-2">
+                  {profile?.business_name && `Business: ${profile.business_name}`}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {profile?.location && `Location: ${profile.location}`}
                 </div>
               </div>
-            ) : (
-              <div className="text-center">
-                <h2 className="text-xl font-bold mb-2">Profile</h2>
-                <div className="mb-4">
-                  <div className="font-semibold text-lg">{profile.name}</div>
-                  <div className="text-gray-600">{profile.email}</div>
-                </div>
-                <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => { setIsAuthenticated(false); setProfile({ name: '', email: '' }); setAuthForm({ name: '', email: '', password: '' }); setShowProfile(false); }}>Sign Out</button>
-              </div>
-            )}
+              <button 
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" 
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
       )}
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b-2 border-orange-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -228,7 +213,7 @@ function SupplierDashboard() {
           {/* Help line + profile */}
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">📞 Help Line: 1800-V2S</span>
-            <button className="text-orange-600 font-medium hover:underline" onClick={() => setShowProfile(true)}>👤 Profile</button>
+            <button className="text-orange-600 font-medium hover:underline" onClick={() => setShowProfileModal(true)}>👤 Profile</button>
           </div>
         </div>
       </div>
@@ -238,7 +223,7 @@ function SupplierDashboard() {
 
         {/* Welcome */}
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome, User! 🙌</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome, {profile?.name || 'Supplier'}! 🙌</h2>
           <p className="text-gray-600 text-lg">Street food vendors looking for quality supplies at the best prices</p>
         </div>
 
