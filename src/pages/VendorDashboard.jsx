@@ -7,6 +7,12 @@ import { useNavigate } from 'react-router-dom';
 
 function VendorDashboard() {
     const [searchQuery, setSearchQuery] = useState('');
+    const [showProfile, setShowProfile] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [profile, setProfile] = useState({ name: '', email: '' });
+    const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
+    const [isSignup, setIsSignup] = useState(false);
+    const [authError, setAuthError] = useState('');
 
     const navigate = useNavigate();
 
@@ -102,6 +108,63 @@ function VendorDashboard() {
 
     return (
         <div className="min-h-screen bg-orange-50">
+            {/* Profile Modal */}
+            {showProfile && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
+                    <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setShowProfile(false)}>&times;</button>
+                    {!isAuthenticated ? (
+                      <div>
+                        <h2 className="text-xl font-bold mb-4 text-center">{isSignup ? 'Sign Up' : 'Sign In'}</h2>
+                        <form onSubmit={e => {
+                          e.preventDefault();
+                          if (isSignup && !authForm.name) {
+                            setAuthError('Name is required for sign up.');
+                            return;
+                          }
+                          if (!authForm.email || !authForm.password) {
+                            setAuthError('Email and password are required.');
+                            return;
+                          }
+                          setAuthError('');
+                          setIsAuthenticated(true);
+                          setProfile({ name: authForm.name || 'Vendor', email: authForm.email });
+                          setShowProfile(false);
+                        }} className="space-y-4">
+                          {isSignup && (
+                            <div>
+                              <label className="block mb-1 font-medium">Name</label>
+                              <input type="text" name="name" value={authForm.name} onChange={e => setAuthForm(f => ({ ...f, name: e.target.value }))} className="w-full border rounded px-3 py-2" placeholder="Your Name" />
+                            </div>
+                          )}
+                          <div>
+                            <label className="block mb-1 font-medium">Email</label>
+                            <input type="email" name="email" value={authForm.email} onChange={e => setAuthForm(f => ({ ...f, email: e.target.value }))} className="w-full border rounded px-3 py-2" placeholder="you@example.com" />
+                          </div>
+                          <div>
+                            <label className="block mb-1 font-medium">Password</label>
+                            <input type="password" name="password" value={authForm.password} onChange={e => setAuthForm(f => ({ ...f, password: e.target.value }))} className="w-full border rounded px-3 py-2" placeholder="Password" />
+                          </div>
+                          {authError && <div className="text-red-500 text-sm">{authError}</div>}
+                          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">{isSignup ? 'Sign Up' : 'Sign In'}</button>
+                        </form>
+                        <div className="mt-4 text-center">
+                          <button className="text-blue-600 hover:underline text-sm" onClick={() => { setIsSignup(s => !s); setAuthError(''); }}>{isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <h2 className="text-xl font-bold mb-2">Profile</h2>
+                        <div className="mb-4">
+                          <div className="font-semibold text-lg">{profile.name}</div>
+                          <div className="text-gray-600">{profile.email}</div>
+                        </div>
+                        <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => { setIsAuthenticated(false); setProfile({ name: '', email: '' }); setAuthForm({ name: '', email: '', password: '' }); setShowProfile(false); }}>Sign Out</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+            )}
             {/* Header */}
             <div className="bg-white shadow-sm p-4">
                 <div className="max-w-6xl mx-auto flex justify-between items-center">
@@ -116,7 +179,7 @@ function VendorDashboard() {
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">✓ Verified Vendor</span>
-                        <button className="text-gray-600">👤 Profile</button>
+                        <button className="text-gray-600" onClick={() => setShowProfile(true)}>👤 Profile</button>
                     </div>
                 </div>
             </div>

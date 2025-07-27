@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import VendorAuth from './pages/VendorAuth';
@@ -17,6 +16,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/vendor" element={<VendorDashboard />} />
         <Route path="/supplier" element={<SupplierDashboard />} />
+        <Route path="/vendor-auth" element={<VendorAuth />} />
+        <Route path="/supplier-auth" element={<SupplierAuth />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/faq" element={<Faq />} />
