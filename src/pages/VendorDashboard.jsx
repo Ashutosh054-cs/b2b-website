@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -103,8 +103,14 @@ function VendorDashboard() {
     };
 
     // Redirect to auth if not authenticated
+    useEffect(() => {
+        if (!isAuthenticated) {
+            navigate('/vendor-auth');
+        }
+    }, [isAuthenticated, navigate]);
+
+    // Show loading or return null while redirecting
     if (!isAuthenticated) {
-        navigate('/vendor-auth');
         return null;
     }
 
