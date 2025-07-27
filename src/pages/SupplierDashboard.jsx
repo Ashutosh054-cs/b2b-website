@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Star,
@@ -11,10 +13,13 @@ import {
 } from "lucide-react";
 
 function SupplierDashboard() {
+  const { user, profile, signOut, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
   const [selectedVendor, setSelectedVendor] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const vendors = [
     {
@@ -122,6 +127,23 @@ function SupplierDashboard() {
     deliveries: 156
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/supplier-auth');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Show loading or return null while redirecting
+  if (!isAuthenticated) {
+    return null;
+  }
+
   const handleContact = (vendor) => {
     setSelectedVendor(vendor);
     setModalType('contact');
@@ -147,7 +169,39 @@ function SupplierDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
-      
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
+            <button 
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" 
+              onClick={() => setShowProfileModal(false)}
+            >
+              &times;
+            </button>
+            <div className="text-center">
+              <h2 className="text-xl font-bold mb-2">Profile</h2>
+              <div className="mb-4">
+                <div className="font-semibold text-lg">{profile?.name}</div>
+                <div className="text-gray-600">{profile?.email}</div>
+                <div className="text-sm text-gray-500 mt-2">
+                  {profile?.business_name && `Business: ${profile.business_name}`}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {profile?.location && `Location: ${profile.location}`}
+                </div>
+              </div>
+              <button 
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" 
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b-2 border-orange-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -165,7 +219,7 @@ function SupplierDashboard() {
           {/* Help line + profile */}
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">📞 Help Line: 1800-V2S</span>
-            <button className="text-orange-600 font-medium hover:underline">👤 Profile</button>
+            <button className="text-orange-600 font-medium hover:underline" onClick={() => setShowProfileModal(true)}>👤 Profile</button>
           </div>
         </div>
       </div>
@@ -175,7 +229,7 @@ function SupplierDashboard() {
 
         {/* Welcome */}
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome, User! 🙌</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome, {profile?.name || 'Supplier'}! 🙌</h2>
           <p className="text-gray-600 text-lg">Street food vendors looking for quality supplies at the best prices</p>
         </div>
 

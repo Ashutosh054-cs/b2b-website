@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import {
     Search, Star, MapPin, Phone, Package, Heart, Award
 } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
 
 
 function VendorDashboard() {
-    const [searchQuery, setSearchQuery] = useState('');
-
+    const { user, profile, signOut, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     const handleOrder = (supplier) => {
         navigate(`/order/${supplier.id}`, { state: { supplier } }); // 👈 passing supplier data
@@ -95,6 +97,23 @@ function VendorDashboard() {
         { id: "ORD-002", supplier: "Delhi Bread & Pav Suppliers", product: "Pav Bread - 200pcs", status: "In Transit", amount: "₹600" }
     ];
 
+    const handleSignOut = async () => {
+        await signOut();
+        navigate('/');
+    };
+
+    // Redirect to auth if not authenticated
+    useEffect(() => {
+        if (!isAuthenticated) {
+            navigate('/vendor-auth');
+        }
+    }, [isAuthenticated, navigate]);
+
+    // Show loading or return null while redirecting
+    if (!isAuthenticated) {
+        return null;
+    }
+
     const filteredSuppliers = suppliers.filter(supplier =>
         supplier.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         supplier.products.some(product => product.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -102,6 +121,39 @@ function VendorDashboard() {
 
     return (
         <div className="min-h-screen bg-orange-50">
+            {/* Profile Modal */}
+            {showProfileModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
+                        <button 
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" 
+                            onClick={() => setShowProfileModal(false)}
+                        >
+                            &times;
+                        </button>
+                        <div className="text-center">
+                            <h2 className="text-xl font-bold mb-2">Profile</h2>
+                            <div className="mb-4">
+                                <div className="font-semibold text-lg">{profile?.name}</div>
+                                <div className="text-gray-600">{profile?.email}</div>
+                                <div className="text-sm text-gray-500 mt-2">
+                                    {profile?.business_name && `Business: ${profile.business_name}`}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                    {profile?.location && `Location: ${profile.location}`}
+                                </div>
+                            </div>
+                            <button 
+                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" 
+                                onClick={handleSignOut}
+                            >
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="bg-white shadow-sm p-4">
                 <div className="max-w-6xl mx-auto flex justify-between items-center">
@@ -116,7 +168,7 @@ function VendorDashboard() {
                     </div>
                     <div className="flex items-center gap-4">
                         <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">✓ Verified Vendor</span>
-                        <button className="text-gray-600">👤 Profile</button>
+                        <button className="text-gray-600" onClick={() => setShowProfileModal(true)}>👤 Profile</button>
                     </div>
                 </div>
             </div>
@@ -124,7 +176,7 @@ function VendorDashboard() {
             <div className="max-w-6xl mx-auto p-6">
                 {/* Welcome */}
                 <div className="mb-6">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Namaste, Vendor! 🙏</h2>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Namaste, {profile?.name || 'Vendor'}! 🙏</h2>
                     <p className="text-gray-600">Find trusted Indian street food suppliers</p>
                 </div>
 
