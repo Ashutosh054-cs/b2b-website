@@ -347,32 +347,6 @@ function SupplierDashboard() {
           ))}
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-orange-600" />
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-colors text-center">
-              <div className="text-2xl mb-2">📦</div>
-              <div className="text-sm font-medium">Add New Product</div>
-            </button>
-            <button className="p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors text-center">
-              <div className="text-2xl mb-2">💵</div>
-              <div className="text-sm font-medium">Update Prices</div>
-            </button>
-            <button className="p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-center">
-              <div className="text-2xl mb-2">📊</div>
-              <div className="text-sm font-medium">View Analytics</div>
-            </button>
-            <button className="p-4 border-2 border-dashed border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors text-center">
-              <div className="text-2xl mb-2">🎯</div>
-              <div className="text-sm font-medium">Marketing Tools</div>
-            </button>
-          </div>
-        </div>
-
       </div>
 
       {/* Modal */}
